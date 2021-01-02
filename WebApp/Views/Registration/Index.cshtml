@@ -1,0 +1,232 @@
+﻿@{
+    ViewData["Title"] = "Registration Page";
+}
+
+@model RegistrationViewModel
+
+@{
+    var modalTitle = Model.SelectedRegistration.Id == 0 ? "Add Registration" : "Edit Registration";
+}
+
+<span style="display: none" id="registrationId" data-registration-id="@Model.SelectedRegistration.Id"></span>
+<span style="display: none" id="isValid" data-registration-isValid="@Model.Validation.IsValid"></span>
+<span style="display: none" id="message" data-registration-message="@Model.Validation.Message"></span>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Registrations</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button"
+                        class="btn btn-primary float-right"
+                        data-toggle="modal" data-target="#registrationModal"
+                        style="margin-bottom: 15px; border-radius: 0px;">
+                    Add
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="registrations_table" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Student</th>
+                            <th>Registration</th>
+                            <th>Enroll date</th>
+                            <th>Is Payment Complete</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Registrations)
+                        {
+                            <tr>
+                                <td style="display: none">@item.Id</td>
+                                <td>@item.StudentName</td>
+                                <td>@item.CourseTitle</td>
+                                <td>@item.RegistrationDate</td>
+                                <td>@item.IsPaymentComplete</td>
+                                <td>
+                                    <a class="btn btn-info btn-sm"
+                                       asp-controller="Registration"
+                                       asp-action="Index"
+                                       asp-route-id="@item.Id">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                        Edit
+                                    </a>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal">
+                                        <i class="fas fa-trash"></i>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Student</th>
+                            <th>Registration</th>
+                            <th>Enroll date</th>
+                            <th>Is Payment Complete</th>
+                            <th>Actions</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+<!--Add/Edit Modal-->
+<div class="modal fade" id="registrationModal" tabindex="-1" role="dialog" aria-labelledby="registrationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title" id="registrationModalLabel">@modalTitle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Registration" asp-action="Add" id="SelectedRegistration">
+                    <input asp-for="@Model.SelectedRegistration.Id" style="display: none;" />
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedRegistration.CourseId">Course Title</label>
+                        <select class="form-control select2bs4" style="width: 100%;"
+                                asp-for="@Model.SelectedRegistration.CourseId"
+                                asp-items="@(new SelectList(Model.Courses,nameof(Model.SelectedRegistration.Course.Id),nameof(Model.SelectedRegistration.Course.Title)))">
+                            <option>Please select a course</option>
+                        </select>
+                        <span asp-validation-for="@Model.SelectedRegistration.CourseId"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedRegistration.StudentId">Student Name</label>
+                        <select class="form-control select2bs4" style="width: 100%;"
+                                asp-for="@Model.SelectedRegistration.StudentId"
+                                asp-items="@(new SelectList(Model.Students,nameof(Model.SelectedRegistration.Student.Id),nameof(Model.SelectedRegistration.Student.Name)))">
+                            <option>Please select a student</option>
+                        </select>
+                        <span asp-validation-for="@Model.SelectedRegistration.StudentId"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedRegistration.EnrollDate">Enroll Date</label>
+                        <input class="form-control" type="date" asp-for="@Model.SelectedRegistration.EnrollDate" placeholder="dd-mm-yyyy">
+                        <span asp-validation-for="@Model.SelectedRegistration.EnrollDate"></span>
+                    </div>
+                    <div class="form-group clearfix">
+                        <div class="icheck-success d-inline">
+                            <input class="form-control"
+                                   checked="@Model.SelectedRegistration.IsPaymentComplete"
+                                   type="checkbox"
+                                   asp-for="@Model.SelectedRegistration.IsPaymentComplete">
+                            <label asp-for="@Model.SelectedRegistration.IsPaymentComplete">Is Payment Complete?</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close">Close</button>
+                <input type="submit" value="Save Changes" class="btn btn-success" form="SelectedRegistration">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Registration</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>Are you sure?</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="delete_modal_close">Close</button>
+                <button type="button" class="btn btn-secondary btn-danger" data-dismiss="modal" id="delete_registration">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        //For Add/Edit
+        $(document).ready(function () {
+            var registrationId = $('#registrationId').attr('data-registration-id');
+            if (registrationId != 0) {
+                $("#registrationModal").modal('show');
+                $('#SelectedRegistration').attr('action', `/Registration/Edit`);
+            }
+
+            $('#close').click(function () {
+                $('#SelectedRegistration').attr('action', '/Registration/Add');
+            });
+        });
+
+        //For Delete
+        $("#registrations_table tbody").on('click', 'button', function (event) {
+            var id = $(this).closest('tr').find("td:first").text();
+            $('#registrationId').attr('data-registration-id', id);
+        });
+
+        $('#delete_modal_close').on('click', function () {
+            $('#registrationId').attr('data-registration-id', 0);
+        });
+
+        $("#delete_registration").on('click', function () {
+            var id = $('#registrationId').attr('data-registration-id');
+            $.ajax({
+                type: 'DELETE',
+                url: `/Registration/Delete/${id}`,
+                success: function (data) {
+                    console.log(data);
+                    window.location.href = `/Registration/Index?isValid=${data.isValid}&message=${data.message}`;
+                }
+            });
+        });
+
+        if ($('#message').attr('data-registration-message') !== '') {
+            if ($('#isValid').attr('data-registration-isValid') == 'True') {
+                toastr.success($('#message').attr('data-registration-message'));
+            } else {
+                toastr.error($('#message').attr('data-registration-message'));
+            }
+            $('#message').attr('data-registration-message', '');
+            $('#isValid').attr('data-registration-isValid', '');
+        }
+
+        //For Select2 +  Datatable
+        $(function () {
+            //Initialize Select2 Elements
+            $('.select2').select2()
+
+            //Initialize Select2 Elements
+            $('.select2bs4').select2({
+                theme: 'bootstrap4'
+            })
+
+            $('#registrations_table').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+            });
+        });
+    </script>
+}

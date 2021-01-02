@@ -1,0 +1,196 @@
+﻿@{
+    ViewData["Title"] = "Student Page";
+}
+
+@model StudentViewModel
+
+@{
+    var modalTitle = Model.SelectedStudent.Id == 0 ? "Add Student" : "Edit Student";
+}
+
+<span style="display: none" id="studentId" data-student-id="@Model.SelectedStudent.Id"></span>
+<span style="display: none" id="isValid" data-student-isValid="@Model.Validation.IsValid"></span>
+<span style="display: none" id="message" data-student-message="@Model.Validation.Message"></span>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Students</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button"
+                        class="btn btn-primary float-right"
+                        data-toggle="modal" data-target="#exampleModal"
+                        style="margin-bottom: 15px; border-radius: 0px;">
+                    Add
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="students_table" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Name</th>
+                            <th>Date Of Birth</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Students)
+                        {
+                            <tr>
+                                <td style="display: none">@item.Id</td>
+                                <td>@item.Name</td>
+                                <td>@item.DateOfBirth</td>
+                                <td>
+                                    <a class="btn btn-info btn-sm"
+                                       asp-controller="Student"
+                                       asp-action="Index"
+                                       asp-route-id="@item.Id">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                        Edit
+                                    </a>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal">
+                                        <i class="fas fa-trash"></i>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Name</th>
+                            <th>Date Of Birth</th>
+                            <th>Actions</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+<!--Add/Edit Modal-->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title" id="exampleModalLabel">@modalTitle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Student" asp-action="Add" id="SelectedStudent">
+                    <input asp-for="@Model.SelectedStudent.Id" style="display: none;" />
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedStudent.Name">@nameof(Model.SelectedStudent.Name)</label>
+                        <input class="form-control" asp-for="@Model.SelectedStudent.Name">
+                        <span asp-validation-for="@Model.SelectedStudent.Name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedStudent.DateOfBirth">@nameof(Model.SelectedStudent.DateOfBirth)</label>
+                        <input class="form-control" type="date" asp-for="@Model.SelectedStudent.DateOfBirth" placeholder="dd-mm-yyyy">
+                        <span asp-validation-for="@Model.SelectedStudent.DateOfBirth"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close">Close</button>
+                <input type="submit" value="Save Changes" class="btn btn-success" form="SelectedStudent">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title" id="exampleModalLabel">Delete Student</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>Are you sure?</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="delete_modal_close">Close</button>
+                <button type="button" class="btn btn-secondary btn-danger" data-dismiss="modal" id="delete_student">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        //For Add/Edit
+        $(document).ready(function () {
+            var studentId = $('#studentId').attr('data-student-id');
+            if (studentId != 0) {
+                $("#exampleModal").modal('show');
+                $('#SelectedStudent').attr('action', `/Student/Edit`);
+            }
+
+            $('#close').click(function () {
+                $('#SelectedStudent').attr('action', '/Student/Add');
+            });
+        });
+
+        //For Delete
+        $("#students_table tbody").on('click', 'button', function (event) {
+            var id = $(this).closest('tr').find("td:first").text();
+            $('#studentId').attr('data-student-id', id);
+        });
+
+        $('#delete_modal_close').on('click', function () {
+            $('#studentId').attr('data-student-id', 0);
+        });
+
+        $("#delete_student").on('click', function () {
+            var id = $('#studentId').attr('data-student-id');
+            $.ajax({
+                type: 'DELETE',
+                url: `/Student/Delete/${id}`,
+                success: function (data) {
+                    window.location.href = `/Student/Index?isValid=${data.isValid}&message=${data.message}`;
+                }
+            });
+        });
+
+        if ($('#message').attr('data-student-message') !== '') {
+            if ($('#isValid').attr('data-student-isValid') == 'True') {
+                toastr.success($('#message').attr('data-student-message'));
+            } else {
+                toastr.error($('#message').attr('data-student-message'));
+            }
+            $('#message').attr('data-student-message', '');
+            $('#isValid').attr('data-student-isValid', '');
+        }
+        
+        //For Datatable
+        $(function () {
+
+            $('#students_table').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+            });
+        });
+    </script>
+}

@@ -1,0 +1,16 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Week3Exam/Week3Exam/obj
+/Week3Exam/Week3Exam/bin/Debug/netcoreapp3.1
+/Week3Exam/Week3Exam/.vs
+Week3Exam/obj
+Week3Exam/bin
+/.vs
+/Core/bin/Debug/netcoreapp3.1
+/Core/obj
+/Infrastructure/bin/Debug/netcoreapp3.1
+/Infrastructure/obj
+/WebApp/bin/Debug/netcoreapp3.1
+/WebApp/obj

@@ -1,0 +1,203 @@
+﻿@{
+    ViewData["Title"] = "Course Page";
+}
+
+@model CourseViewModel
+
+@{
+    var modalTitle = Model.SelectedCourse.Id == 0 ? "Add Course" : "Edit Course";
+}
+
+<span style="display: none" id="courseId" data-course-id="@Model.SelectedCourse.Id"></span>
+<span style="display: none" id="isValid" data-course-isValid="@Model.Validation.IsValid"></span>
+<span style="display: none" id="message" data-course-message="@Model.Validation.Message"></span>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Courses</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button"
+                        class="btn btn-primary float-right"
+                        data-toggle="modal" data-target="#exampleModal"
+                        style="margin-bottom: 15px; border-radius: 0px;">
+                    Add
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="courses_table" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Title</th>
+                            <th>Seat Count</th>
+                            <th>Fee</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Courses)
+                        {
+                            <tr>
+                                <td style="display: none">@item.Id</td>
+                                <td>@item.Title</td>
+                                <td>@item.SeatCount</td>
+                                <td>@item.Fee</td>
+                                <td>
+                                    <a class="btn btn-info btn-sm"
+                                       asp-controller="Course"
+                                       asp-action="Index"
+                                       asp-route-id="@item.Id">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                        Edit
+                                    </a>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal">
+                                        <i class="fas fa-trash"></i>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Title</th>
+                            <th>Seat Count</th>
+                            <th>Fee</th>
+                            <th>Actions</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+<!--Add/Edit Modal-->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title" id="exampleModalLabel">@modalTitle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Course" asp-action="Add" id="SelectedCourse">
+                    <input asp-for="@Model.SelectedCourse.Id" style="display: none;" />
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedCourse.Title">@nameof(Model.SelectedCourse.Title)</label>
+                        <input class="form-control" asp-for="@Model.SelectedCourse.Title">
+                        <span asp-validation-for="@Model.SelectedCourse.Title"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedCourse.SeatCount">@nameof(Model.SelectedCourse.SeatCount)</label>
+                        <input class="form-control" type="number" asp-for="@Model.SelectedCourse.SeatCount">
+                        <span asp-validation-for="@Model.SelectedCourse.SeatCount"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.SelectedCourse.Fee">@nameof(Model.SelectedCourse.Fee)</label>
+                        <input class="form-control" type="number" asp-for="@Model.SelectedCourse.Fee">
+                        <span asp-validation-for="@Model.SelectedCourse.Fee"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close">Close</button>
+                <input type="submit" value="Save Changes" class="btn btn-success" form="SelectedCourse">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title" id="exampleModalLabel">Delete Course</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>Are you sure?</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="delete_modal_close">Close</button>
+                <button type="button" class="btn btn-secondary btn-danger" data-dismiss="modal" id="delete_course">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        //For Add/Edit
+        $(document).ready(function () {
+            var courseId = $('#courseId').attr('data-course-id');
+            if (courseId != 0) {
+                $("#exampleModal").modal('show');
+                $('#SelectedCourse').attr('action', `/Course/Edit`);
+            }
+
+            $('#close').click(function () {
+                $('#SelectedCourse').attr('action', '/Course/Add');
+            });
+        });
+
+        //For Delete
+        $("#courses_table tbody").on('click', 'button', function (event) {
+            var id = $(this).closest('tr').find("td:first").text();
+            $('#courseId').attr('data-course-id', id);
+        });
+
+        $('#delete_modal_close').on('click', function () {
+            $('#courseId').attr('data-course-id', 0);
+        });
+
+        $("#delete_course").on('click', function () {
+            var id = $('#courseId').attr('data-course-id');
+            $.ajax({
+                type: 'DELETE',
+                url: `/Course/Delete/${id}`,
+                success: function (data) {
+                    window.location.href = `/Course/Index?isValid=${data.isValid}&message=${data.message}`;
+                }
+            });
+        });
+
+        if ($('#message').attr('data-course-message') !== '') {
+            if ($('#isValid').attr('data-course-isValid') == 'True') {
+                toastr.success($('#message').attr('data-course-message'));
+            } else {
+                toastr.error($('#message').attr('data-course-message'));
+            }
+            $('#message').attr('data-course-message', '');
+            $('#isValid').attr('data-course-isValid', '');
+        }
+
+        //For Datatable
+        $(function () {
+            $('#courses_table').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+            });
+        });
+    </script>
+}
