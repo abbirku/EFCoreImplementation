@@ -20,9 +20,10 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-12">
-                <button type="button"
+                <button id="add-new-student"
+                        type="button"
                         class="btn btn-primary float-right"
-                        data-toggle="modal" data-target="#exampleModal"
+                        data-toggle="modal" data-target="#studentModal"
                         style="margin-bottom: 15px; border-radius: 0px;">
                     Add
                 </button>
@@ -79,11 +80,11 @@
 </div>
 
 <!--Add/Edit Modal-->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="studentModal" tabindex="-1" role="dialog" aria-labelledby="StudentModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h5 class="modal-title" id="exampleModalLabel">@modalTitle</h5>
+                <h5 class="modal-title" id="StudentModalLabel">@modalTitle</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -116,8 +117,8 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-danger">
-                <h5 class="modal-title" id="exampleModalLabel">Delete Student</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="StudentDeleteModalLabel">Delete Student</h5>
+                <button type="button" id="close" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -139,13 +140,24 @@
         $(document).ready(function () {
             var studentId = $('#studentId').attr('data-student-id');
             if (studentId != 0) {
-                $("#exampleModal").modal('show');
+                $("#studentModal").modal('show');
                 $('#SelectedStudent').attr('action', `/Student/Edit`);
             }
+        });
 
-            $('#close').click(function () {
-                $('#SelectedStudent').attr('action', '/Student/Add');
-            });
+        $('#add-new-student').on('click', () => {
+            //Initialize studentId, isValid & message
+            $('#studentId').attr('data-student-id', 0);
+            $('#isValid').attr('data-student-isValid', 'False');
+            $('#message').attr('data-student-message', '');
+
+            //Make modal text as 'Add Student'
+            $('#StudentModalLabel').text('Add Student');
+
+            //Initialize form data
+            $('#SelectedStudent').attr('action', '/Student/Add');
+            $('#SelectedStudent_Name').val('');
+            $('#SelectedStudent_DateOfBirth').val('');
         });
 
         //For Delete
@@ -169,6 +181,7 @@
             });
         });
 
+        //For message
         if ($('#message').attr('data-student-message') !== '') {
             if ($('#isValid').attr('data-student-isValid') == 'True') {
                 toastr.success($('#message').attr('data-student-message'));

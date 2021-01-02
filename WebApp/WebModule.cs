@@ -21,11 +21,6 @@ namespace WebApp
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<CourseContext>()
-                .WithParameter("connectionString", _connectionString)
-                .WithParameter("migrationAssemblyName", _migrationAssemblyName)
-                .InstancePerLifetimeScope();
-
             builder.RegisterType<StudentModel>().AsSelf();
             builder.RegisterType<CourseModel>().AsSelf();
             builder.RegisterType<RegistrationModel>().AsSelf();
