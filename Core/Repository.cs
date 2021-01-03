@@ -27,11 +27,6 @@ namespace Core
             _dbSet.Add(entity);
         }
 
-        public virtual async Task AddAsync(TEntity entity)
-        {
-            await _dbSet.AddAsync(entity);
-        }
-
         public virtual void Remove(TKey id)
         {
             var entityToDelete = _dbSet.Find(id);
@@ -88,12 +83,6 @@ namespace Core
         {
             IQueryable<TEntity> query = _dbSet;
             return query.ToList();
-        }
-
-        public virtual async Task<IList<TEntity>> GetAllAsync()
-        {
-            IQueryable<TEntity> query = _dbSet;
-            return await query.ToListAsync();
         }
 
         public virtual TEntity GetById(TKey id)
