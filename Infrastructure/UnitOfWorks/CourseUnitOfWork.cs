@@ -8,6 +8,13 @@ using System.Text;
 
 namespace Infrastructure.UnitOfWorks
 {
+    public interface ICourseUnitOfWork : IUnitOfWork
+    {
+        public IStudentRepository StudentRepository { get; set; }
+        public ICourseRepository CourseRepository { get; set; }
+        public IStudentRegistrationRepository StudentRegistrationRepository { get; set; }
+    }
+
     public class CourseUnitOfWork : UnitOfWork, ICourseUnitOfWork
     {
         public IStudentRepository StudentRepository { get; set; }

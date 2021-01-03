@@ -3,6 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Context
 {
+    public interface ICourseContext
+    {
+        DbSet<Student> Students { get; set; }
+        DbSet<Course> Courses { get; set; }
+        DbSet<StudentRegistration> StudentRegistrations { get; set; }
+    }
+
     public class CourseContext : DbContext, ICourseContext
     {
         private string _connectionString;

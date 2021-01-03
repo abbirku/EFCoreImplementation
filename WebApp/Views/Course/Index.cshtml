@@ -20,9 +20,10 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-12">
-                <button type="button"
+                <button id="add-new-course"
+                        type="button"
                         class="btn btn-primary float-right"
-                        data-toggle="modal" data-target="#exampleModal"
+                        data-toggle="modal" data-target="#courseModal"
                         style="margin-bottom: 15px; border-radius: 0px;">
                     Add
                 </button>
@@ -82,11 +83,11 @@
 </div>
 
 <!--Add/Edit Modal-->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="courseModal" tabindex="-1" role="dialog" aria-labelledby="courseModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h5 class="modal-title" id="exampleModalLabel">@modalTitle</h5>
+                <h5 class="modal-title" id="courseModalLabel">@modalTitle</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -124,7 +125,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-danger">
-                <h5 class="modal-title" id="exampleModalLabel">Delete Course</h5>
+                <h5 class="modal-title" id="courseModalLabel">Delete Course</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -147,13 +148,26 @@
         $(document).ready(function () {
             var courseId = $('#courseId').attr('data-course-id');
             if (courseId != 0) {
-                $("#exampleModal").modal('show');
+                $("#courseModal").modal('show');
                 $('#SelectedCourse').attr('action', `/Course/Edit`);
             }
+        });
 
-            $('#close').click(function () {
-                $('#SelectedCourse').attr('action', '/Course/Add');
-            });
+        $('#add-new-course').on('click', () => {
+            debugger;
+            //Initialize courseId, isValid & message
+            $('#courseId').attr('data-course-id', 0);
+            $('#isValid').attr('data-course-isValid', 'False');
+            $('#message').attr('data-course-message', '');
+
+            //Make modal text as 'Add Course'
+            $('#courseModalLabel').text('Add Course');
+
+            //Initialize form data
+            $('#SelectedCourse').attr('action', '/Course/Add');
+            $('#SelectedCourse_Title').val('');
+            $('#SelectedCourse_SeatCount').val(0);
+            $('#SelectedCourse_Fee').val(0);
         });
 
         //For Delete
@@ -177,6 +191,7 @@
             });
         });
 
+        //For Message
         if ($('#message').attr('data-course-message') !== '') {
             if ($('#isValid').attr('data-course-isValid') == 'True') {
                 toastr.success($('#message').attr('data-course-message'));

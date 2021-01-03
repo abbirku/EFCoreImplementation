@@ -100,19 +100,19 @@ namespace WebApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Course");
+                    //b.Navigation("Course");
 
-                    b.Navigation("Student");
+                    //b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Infrastructure.Entities.Course", b =>
                 {
-                    b.Navigation("Students");
+                    //b.Navigation("Students");
                 });
 
             modelBuilder.Entity("Infrastructure.Entities.Student", b =>
                 {
-                    b.Navigation("Courses");
+                    //b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

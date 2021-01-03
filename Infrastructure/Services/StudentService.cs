@@ -1,7 +1,9 @@
 ﻿using Infrastructure.BusinessObject;
+using Infrastructure.DTO;
 using Infrastructure.UnitOfWorks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,9 +11,10 @@ namespace Infrastructure.Services
 {
     public interface IStudentService : IDisposable
     {
-        Task<ValidationModel> EnrollStudent(StudentInfo studentInfo);
-        Task<ValidationModel> UpdateStudentInfo(StudentInfo studentInfo);
-        Task<ValidationModel> RemoveStudent(int id);
+        ValidationModel EnrollStudent(StudentInfo studentInfo);
+        ValidationModel UpdateStudentInfo(StudentInfo studentInfo);
+        ValidationModel RemoveStudent(int id);
+        IList<StudentDTO> GetStudents();
     }
 
     public class StudentService : IStudentService
@@ -23,7 +26,7 @@ namespace Infrastructure.Services
             _courseUnitOfWork = courseUnitOfWork;
         }
 
-        public async Task<ValidationModel> EnrollStudent(StudentInfo studentInfo)
+        public ValidationModel EnrollStudent(StudentInfo studentInfo)
         {
             try
             {
@@ -32,7 +35,7 @@ namespace Infrastructure.Services
                     return new ValidationModel { IsValid = false, Message = validation.Message };
 
                 _courseUnitOfWork.StudentRepository.Add(studentInfo.Student);
-                await _courseUnitOfWork.SaveChangesAsync();
+                _courseUnitOfWork.SaveChanges();
 
                 return new ValidationModel { IsValid = true, Message = $"{studentInfo.Student.Name} has been successfully enrolled." };
             }
@@ -43,7 +46,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<ValidationModel> UpdateStudentInfo(StudentInfo studentInfo)
+        public ValidationModel UpdateStudentInfo(StudentInfo studentInfo)
         {
             try
             {
@@ -52,7 +55,9 @@ namespace Infrastructure.Services
                     return new ValidationModel { IsValid = false, Message = validation.Message };
 
                 _courseUnitOfWork.StudentRepository.Edit(studentInfo.Student);
-                await _courseUnitOfWork.SaveChangesAsync();
+                _courseUnitOfWork.SaveChanges();
+
+                var test = _courseUnitOfWork.StudentRepository.GetAll();
 
                 return new ValidationModel { IsValid = true, Message = $"{studentInfo.Student.Name} data has been successfully updated." };
             }
@@ -63,7 +68,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<ValidationModel> RemoveStudent(int id)
+        public ValidationModel RemoveStudent(int id)
         {
             try
             {
@@ -75,7 +80,7 @@ namespace Infrastructure.Services
                     throw new Exception("Student does not exists.");
 
                 _courseUnitOfWork.StudentRepository.Remove(student);
-                await _courseUnitOfWork.SaveChangesAsync();
+                _courseUnitOfWork.SaveChanges();
 
                 return new ValidationModel { IsValid = true, Message = $"{student.Name} has been successfully remove." };
             }
@@ -84,6 +89,18 @@ namespace Infrastructure.Services
                 //Implement serilog for logging the error message
                 return new ValidationModel { IsValid = false, Message = ex.Message };
             }
+        }
+
+        public IList<StudentDTO> GetStudents()
+        {
+            var studentList = _courseUnitOfWork.StudentRepository.GetAll().Select(x => new StudentDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                DateOfBirth = x.DateOfBirth.ToString("dd/MM/yyyy")
+            }).ToList();
+
+            return studentList;
         }
 
         public void Dispose()

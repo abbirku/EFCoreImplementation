@@ -32,7 +32,7 @@ namespace Infrastructure.Repositories
             //    SeatCount = x.SeatCount,
             //    Fee = x.Fee
             //}).ToList();
-            var courseList = GetAll();
+            var courseList = GetAll().ToList();
 
             return courseList;
         }

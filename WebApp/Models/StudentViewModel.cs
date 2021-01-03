@@ -29,7 +29,7 @@ namespace WebApp.Models
 
             var model = new StudentViewModel
             {
-                Students = _courseUnitOfWork.StudentRepository.GetStudents(),
+                Students = _studentService.GetStudents(),
                 SelectedStudent = selectedStudent,
                 Validation = new ValidationModel { IsValid = isValid, Message = message }
             };
@@ -46,7 +46,7 @@ namespace WebApp.Models
     public class StudentViewModel
     {
         public Student SelectedStudent { get; set; }
-        public List<StudentDTO> Students { get; set; }
+        public IList<StudentDTO> Students { get; set; }
         public ValidationModel Validation { get; set; }
     }
 }

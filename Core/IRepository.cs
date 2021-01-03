@@ -12,6 +12,7 @@ namespace Core
         where TContext : DbContext
     {
         void Add(TEntity entity);
+        Task AddAsync(TEntity entity);
         void Remove(TKey id);
         void Remove(TEntity entityToDelete);
         void Remove(Expression<Func<TEntity, bool>> filter);
@@ -19,6 +20,7 @@ namespace Core
         int GetCount(Expression<Func<TEntity, bool>> filter = null);
         IList<TEntity> Get(Expression<Func<TEntity, bool>> filter);
         IList<TEntity> GetAll();
+        Task<IList<TEntity>> GetAllAsync();
         TEntity GetById(TKey id);
         (IList<TEntity> data, int total, int totalDisplay) Get(
             Expression<Func<TEntity, bool>> filter = null,

@@ -24,34 +24,23 @@ namespace Infrastructure
             builder.RegisterType<CourseContext>()
                    .WithParameter("connectionString", _connectionString)
                    .WithParameter("migrationAssemblyName", _migrationAssemblyName)
-                   .InstancePerLifetimeScope();
+                   .InstancePerLifetimeScope(); ;
 
             //builder.RegisterGeneric(typeof(Repository<,,>)).As(typeof(IRepository<,,>))
             //    .InstancePerLifetimeScope();
 
             //Registering repositories
-            builder.RegisterType<StudentRepository>().As<IStudentRepository>()
-                .InstancePerLifetimeScope();
-
-            builder.RegisterType<CourseRepository>().As<ICourseRepository>()
-                .InstancePerLifetimeScope();
-
-            builder.RegisterType<StudentRegistrationRepository>().As<IStudentRegistrationRepository>()
-                .InstancePerLifetimeScope();
+            builder.RegisterType<StudentRepository>().As<IStudentRepository>();
+            builder.RegisterType<CourseRepository>().As<ICourseRepository>();
+            builder.RegisterType<StudentRegistrationRepository>().As<IStudentRegistrationRepository>();
 
             //Registering UnitOfWorks
-            builder.RegisterType<CourseUnitOfWork>().As<ICourseUnitOfWork>()
-                .InstancePerLifetimeScope();
+            builder.RegisterType<CourseUnitOfWork>().As<ICourseUnitOfWork>();
 
             //Registering services
-            builder.RegisterType<CourseRegistrationService>().As<ICourseRegistrationService>()
-                .InstancePerLifetimeScope();
-
-            builder.RegisterType<StudentService>().As<IStudentService>()
-                .InstancePerLifetimeScope();
-
-            builder.RegisterType<CourseService>().As<ICourseService>()
-                .InstancePerLifetimeScope();
+            builder.RegisterType<CourseRegistrationService>().As<ICourseRegistrationService>();
+            builder.RegisterType<StudentService>().As<IStudentService>();
+            builder.RegisterType<CourseService>().As<ICourseService>();
 
             //Registering type
             builder.RegisterType<RegistrationInfo>().AsSelf();

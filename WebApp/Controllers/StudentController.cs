@@ -34,11 +34,11 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(Student selectedStudent)
+        public IActionResult Add(Student selectedStudent)
         {
             try
             {
-                var result = await _studentService.EnrollStudent(new StudentInfo { Student = selectedStudent });
+                var result = _studentService.EnrollStudent(new StudentInfo { Student = selectedStudent });
 
                 if (result.IsValid)
                     return RedirectToAction("Index", "Student", new { isValid = result.IsValid, message = result.Message });
@@ -52,11 +52,11 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Student selectedStudent)
+        public IActionResult Edit(Student selectedStudent)
         {
             try
             {
-                var result = await _studentService.UpdateStudentInfo(new StudentInfo { Student = selectedStudent });
+                var result = _studentService.UpdateStudentInfo(new StudentInfo { Student = selectedStudent });
 
                 if (result.IsValid)
                     return RedirectToAction("Index", "Student", new { isValid = result.IsValid, message = result.Message });
@@ -70,11 +70,11 @@ namespace WebApp.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
             try
             {
-                var result = await _studentService.RemoveStudent(id);
+                var result = _studentService.RemoveStudent(id);
 
                 return Json(new { result.IsValid, result.Message });
             }
