@@ -1,17 +1,19 @@
 ﻿using Infrastructure.BusinessObject;
+using Infrastructure.Entities;
 using Infrastructure.UnitOfWorks;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Services
 {
     public interface ICourseService : IDisposable
     {
-        Task<ValidationModel> Createcourse(CourseInfo courseInfo);
-        Task<ValidationModel> UpdateCourseInfo(CourseInfo courseInfo);
-        Task<ValidationModel> RemoveCourse(int id);
+        ValidationModel<Course> GetCourseById(int id);
+        IList<Course> GetCourses();
+        Task<ValidationModel<Course>> Createcourse(CourseInfo courseInfo);
+        Task<ValidationModel<Course>> UpdateCourseInfo(CourseInfo courseInfo);
+        Task<ValidationModel<Course>> RemoveCourse(int id);
 
     }
 
@@ -24,27 +26,49 @@ namespace Infrastructure.Services
             _courseUnitOfWork = courseUnitOfWork;
         }
 
-        public async Task<ValidationModel> Createcourse(CourseInfo courseInfo)
+        public ValidationModel<Course> GetCourseById(int id)
+        {
+            try
+            {
+                var course = _courseUnitOfWork.CourseRepository.GetById(id);
+                if (course == null)
+                    throw new Exception($"Course does not exists with {id} Id");
+
+                return new ValidationModel<Course> { IsValid = true, Data = course, Message = "Data found" };
+            }
+            catch (Exception ex)
+            {
+                //Implement serilog for logging the error message
+                return new ValidationModel<Course> { IsValid = false, Message = ex.Message };
+            }
+        }
+
+        public IList<Course> GetCourses()
+        {
+            return _courseUnitOfWork.CourseRepository.GetCourses();
+        }
+
+        public async Task<ValidationModel<Course>> Createcourse(CourseInfo courseInfo)
         {
             try
             {
                 var validation = courseInfo.IsValid();
                 if (!validation.IsValid)
-                    return new ValidationModel { IsValid = false, Message = validation.Message };
+                    return new ValidationModel<Course> { IsValid = false, Message = validation.Message };
 
                 _courseUnitOfWork.CourseRepository.Add(courseInfo.Course);
                 await _courseUnitOfWork.SaveChangesAsync();
 
-                return new ValidationModel { IsValid = true, Message = $"{courseInfo.Course.Title} has been successfully created." };
+                return new ValidationModel<Course> { IsValid = true, Data = courseInfo.Course, Message = $"{courseInfo.Course.Title} has been successfully created." };
             }
             catch (Exception ex)
             {
                 //Implement serilog for logging the error message
-                throw new Exception(ex.Message);
+                return new ValidationModel<Course> { IsValid = false, Message = ex.Message };
             }
         }
 
-        public async Task<ValidationModel> UpdateCourseInfo(CourseInfo courseInfo)
+        public async Task<ValidationModel<Course>> UpdateCourseInfo(CourseInfo courseInfo)
         {
             try
             {
@@ -55,21 +79,21 @@ namespace Infrastructure.Services
                 _courseUnitOfWork.CourseRepository.Edit(courseInfo.Course);
                 await _courseUnitOfWork.SaveChangesAsync();
 
-                return new ValidationModel { IsValid = true, Message = $"{courseInfo.Course.Title} has been successfully updated." };
+                return new ValidationModel<Course> { IsValid = true, Data = courseInfo.Course, Message = $"{courseInfo.Course.Title} has been successfully updated." };
             }
             catch (Exception ex)
             {
                 //Implement serilog for logging the error message
-                throw new Exception(ex.Message);
+                return new ValidationModel<Course> { IsValid = false, Message = ex.Message };
             }
         }
 
-        public async Task<ValidationModel> RemoveCourse(int id)
+        public async Task<ValidationModel<Course>> RemoveCourse(int id)
         {
             try
             {
                 if (id == 0)
-                    return new ValidationModel { IsValid = false, Message = "Please provide a valid Id" };
+                    return new ValidationModel<Course> { IsValid = false, Message = "Please provide a valid Id" };
 
                 var course = _courseUnitOfWork.CourseRepository.GetById(id);
                 if (course == null)
@@ -78,12 +102,12 @@ namespace Infrastructure.Services
                 _courseUnitOfWork.CourseRepository.Remove(course);
                 await _courseUnitOfWork.SaveChangesAsync();
 
-                return new ValidationModel { IsValid = true, Message = $"{course.Title} has been successfully remove." };
+                return new ValidationModel<Course> { IsValid = true, Data = course, Message = $"{course.Title} has been successfully remove." };
             }
             catch (Exception ex)
             {
                 //Implement serilog for logging the error message
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<Course> { IsValid = false, Message = ex.Message };
             }
         }
 

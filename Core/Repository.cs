@@ -49,8 +49,20 @@ namespace Core
 
         public virtual void Edit(TEntity entityToUpdate)
         {
-            _dbSet.Attach(entityToUpdate);
+            //Find the tracking object in local cache
+            var local = _dbSet.Local.FirstOrDefault(e => e.Id.Equals(entityToUpdate.Id));
+
+            // check if local is not null 
+            if (local != null) {
+                //Then detach
+                _dbContext.Entry(local).State = EntityState.Detached;
+            }
+
+            // set Modified flag in your entry
             _dbContext.Entry(entityToUpdate).State = EntityState.Modified;
+
+            //_dbSet.Attach(entityToUpdate);
+            //_dbContext.Entry(entityToUpdate).State = EntityState.Modified;
         }
 
         public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)

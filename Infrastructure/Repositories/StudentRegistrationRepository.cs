@@ -11,7 +11,7 @@ namespace Infrastructure.Repositories
 {
     public interface IStudentRegistrationRepository : IRepository<StudentRegistration, int, CourseContext>
     {
-        List<RegistrationDTO> GetRegistrations();
+        IList<RegistrationDTO> GetRegistrations();
     }
 
     public class StudentRegistrationRepository : Repository<StudentRegistration, int, CourseContext>, IStudentRegistrationRepository
@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories
 
         }
 
-        public List<RegistrationDTO> GetRegistrations()
+        public IList<RegistrationDTO> GetRegistrations()
         {
             var result = GetAll().Select(x => new RegistrationDTO
             {

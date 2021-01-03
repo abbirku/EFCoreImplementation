@@ -14,19 +14,19 @@ namespace WebApp.Controllers
 {
     public class CourseController : Controller
     {
-        private readonly ICourseService _courseService;
-
-        public CourseController(ICourseService courseService)
-        {
-            _courseService = courseService;
-        }
-
         public IActionResult Index(int id = 0, bool isValid = false, string message = "")
         {
-            var courseModel = Startup.AutofacContainer.Resolve<CourseModel>();
-            var model = courseModel.CreateCourseViewModel(id, isValid, message);
+            try
+            {
+                var courseModel = Startup.AutofacContainer.Resolve<CourseModel>();
+                var model = courseModel.CreateCourseViewModel(id, isValid, message);
 
-            return View(model);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Error", new { message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -34,7 +34,8 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = await _courseService.Createcourse(new CourseInfo
+                var courseModel = Startup.AutofacContainer.Resolve<CourseModel>();
+                var result = await courseModel.Createcourse(new CourseInfo
                 {
                     Course = selectedCourse
                 });
@@ -55,7 +56,8 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = await _courseService.UpdateCourseInfo(new CourseInfo
+                var courseModel = Startup.AutofacContainer.Resolve<CourseModel>();
+                var result = await courseModel.UpdateCourseInfo(new CourseInfo
                 {
                     Course = selectedCourse
                 });
@@ -76,7 +78,8 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = await _courseService.RemoveCourse(id);
+                var courseModel = Startup.AutofacContainer.Resolve<CourseModel>();
+                var result = await courseModel.RemoveCourse(id);
 
                 return Json(new { result.IsValid, result.Message });
             }

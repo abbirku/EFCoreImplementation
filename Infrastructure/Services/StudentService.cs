@@ -1,5 +1,6 @@
 ﻿using Infrastructure.BusinessObject;
 using Infrastructure.DTO;
+using Infrastructure.Entities;
 using Infrastructure.UnitOfWorks;
 using System;
 using System.Collections.Generic;
@@ -11,9 +12,10 @@ namespace Infrastructure.Services
 {
     public interface IStudentService : IDisposable
     {
-        ValidationModel EnrollStudent(StudentInfo studentInfo);
-        ValidationModel UpdateStudentInfo(StudentInfo studentInfo);
-        ValidationModel RemoveStudent(int id);
+        ValidationModel<Student> GetStudentById(int id);
+        ValidationModel<Student> EnrollStudent(StudentInfo studentInfo);
+        ValidationModel<Student> UpdateStudentInfo(StudentInfo studentInfo);
+        ValidationModel<Student> RemoveStudent(int id);
         IList<StudentDTO> GetStudents();
     }
 
@@ -26,54 +28,69 @@ namespace Infrastructure.Services
             _courseUnitOfWork = courseUnitOfWork;
         }
 
-        public ValidationModel EnrollStudent(StudentInfo studentInfo)
+        public ValidationModel<Student> GetStudentById(int id)
+        {
+            try
+            {
+                var student = _courseUnitOfWork.StudentRepository.GetById(id);
+                if (student == null)
+                    throw new Exception($"Student does not exists with {id} Id");
+
+                return new ValidationModel<Student> { IsValid = true, Data = student, Message = "Data found" };
+            }
+            catch (Exception ex)
+            {
+                //Implement serilog for logging the error message
+                return new ValidationModel<Student> { IsValid = false, Message = ex.Message };
+            }
+        }
+
+        public ValidationModel<Student> EnrollStudent(StudentInfo studentInfo)
         {
             try
             {
                 var validation = studentInfo.IsValid();
                 if (!validation.IsValid)
-                    return new ValidationModel { IsValid = false, Message = validation.Message };
+                    return new ValidationModel<Student> { IsValid = false, Message = validation.Message };
 
                 _courseUnitOfWork.StudentRepository.Add(studentInfo.Student);
                 _courseUnitOfWork.SaveChanges();
 
-                return new ValidationModel { IsValid = true, Message = $"{studentInfo.Student.Name} has been successfully enrolled." };
+                return new ValidationModel<Student> { IsValid = true, Data = studentInfo.Student, Message = $"{studentInfo.Student.Name} has been successfully enrolled." };
             }
             catch (Exception ex)
             {
                 //Implement serilog for logging the error message
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<Student> { IsValid = false, Message = ex.Message };
             }
         }
 
-        public ValidationModel UpdateStudentInfo(StudentInfo studentInfo)
+        public ValidationModel<Student> UpdateStudentInfo(StudentInfo studentInfo)
         {
             try
             {
                 var validation = studentInfo.IsValid();
                 if (!validation.IsValid)
-                    return new ValidationModel { IsValid = false, Message = validation.Message };
+                    return new ValidationModel<Student> { IsValid = false, Message = validation.Message };
 
                 _courseUnitOfWork.StudentRepository.Edit(studentInfo.Student);
                 _courseUnitOfWork.SaveChanges();
 
-                var test = _courseUnitOfWork.StudentRepository.GetAll();
-
-                return new ValidationModel { IsValid = true, Message = $"{studentInfo.Student.Name} data has been successfully updated." };
+                return new ValidationModel<Student> { IsValid = true, Data = studentInfo.Student ,Message = $"{studentInfo.Student.Name} data has been successfully updated." };
             }
             catch (Exception ex)
             {
                 //Implement serilog for logging the error message
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<Student> { IsValid = false, Message = ex.Message };
             }
         }
 
-        public ValidationModel RemoveStudent(int id)
+        public ValidationModel<Student> RemoveStudent(int id)
         {
             try
             {
                 if (id == 0)
-                    return new ValidationModel { IsValid = false, Message = "Please provide a valid Id" };
+                    return new ValidationModel<Student> { IsValid = false, Message = "Please provide a valid Id" };
 
                 var student = _courseUnitOfWork.StudentRepository.GetById(id);
                 if (student == null)
@@ -82,25 +99,18 @@ namespace Infrastructure.Services
                 _courseUnitOfWork.StudentRepository.Remove(student);
                 _courseUnitOfWork.SaveChanges();
 
-                return new ValidationModel { IsValid = true, Message = $"{student.Name} has been successfully remove." };
+                return new ValidationModel<Student> { IsValid = true, Data = student, Message = $"{student.Name} has been successfully remove." };
             }
             catch (Exception ex)
             {
                 //Implement serilog for logging the error message
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<Student> { IsValid = false, Message = ex.Message };
             }
         }
 
         public IList<StudentDTO> GetStudents()
         {
-            var studentList = _courseUnitOfWork.StudentRepository.GetAll().Select(x => new StudentDTO
-            {
-                Id = x.Id,
-                Name = x.Name,
-                DateOfBirth = x.DateOfBirth.ToString("dd/MM/yyyy")
-            }).ToList();
-
-            return studentList;
+            return _courseUnitOfWork.StudentRepository.GetStudents();
         }
 
         public void Dispose()

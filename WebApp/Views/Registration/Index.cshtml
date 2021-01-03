@@ -2,7 +2,7 @@
     ViewData["Title"] = "Registration Page";
 }
 
-@model RegistrationViewModel
+@model RegistrationViewModel<StudentRegistration>
 
 @{
     var modalTitle = Model.SelectedRegistration.Id == 0 ? "Add Registration" : "Edit Registration";

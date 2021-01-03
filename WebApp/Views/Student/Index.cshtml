@@ -2,7 +2,7 @@
     ViewData["Title"] = "Student Page";
 }
 
-@model StudentViewModel
+@model StudentViewModel<Student>
 
 @{
     var modalTitle = Model.SelectedStudent.Id == 0 ? "Add Student" : "Edit Student";

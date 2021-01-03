@@ -14,18 +14,21 @@ namespace WebApp.Controllers
 {
     public class RegistrationController : Controller
     {
-        private readonly ICourseRegistrationService _courseRegistrationService;
-
-        public RegistrationController(ICourseRegistrationService courseRegistrationService)
-        {
-            _courseRegistrationService = courseRegistrationService;
-        }
 
         public IActionResult Index(int id = 0, bool isValid = false, string message = "")
         {
-            var registrationModel = Startup.AutofacContainer.Resolve<RegistrationModel>();
-            var model = registrationModel.CreateStudentViewModel(id, isValid, message);
-            return View(model);
+            try
+            {
+                var registrationModel = Startup.AutofacContainer.Resolve<RegistrationModel>();
+                var model = registrationModel.CreateStudentViewModel(id, isValid, message);
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Error", new { message = ex.Message });
+            }
+            
         }
 
         [HttpPost]
@@ -36,7 +39,9 @@ namespace WebApp.Controllers
                 var registrationInfoModel = Startup.AutofacContainer.Resolve<RegistrationInfo>();
                 registrationInfoModel.StudentRegistration = selectedRegistration;
 
-                var result = await _courseRegistrationService.RegisterStudentAsync(registrationInfoModel);
+                var registrationModel = Startup.AutofacContainer.Resolve<RegistrationModel>();
+
+                var result = await registrationModel.RegisterStudentAsync(registrationInfoModel);
 
                 if (result.IsValid)
                     return RedirectToAction("Index", "Registration", new { isValid = result.IsValid, message = result.Message });
@@ -57,7 +62,9 @@ namespace WebApp.Controllers
                 var registrationInfoModel = Startup.AutofacContainer.Resolve<RegistrationInfo>();
                 registrationInfoModel.StudentRegistration = selectedRegistration;
 
-                var result = await _courseRegistrationService.UpdateRegisteration(registrationInfoModel);
+                var registrationModel = Startup.AutofacContainer.Resolve<RegistrationModel>();
+
+                var result = await registrationModel.UpdateRegisteration(registrationInfoModel);
 
                 if (result.IsValid)
                     return RedirectToAction("Index", "Registration", new { isValid = result.IsValid, message = result.Message });
@@ -75,7 +82,9 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = await _courseRegistrationService.DeletRegisteration(id);
+                var registrationModel = Startup.AutofacContainer.Resolve<RegistrationModel>();
+
+                var result = await registrationModel.DeletRegisteration(id);
 
                 return Json(new { result.IsValid, result.Message });
             }

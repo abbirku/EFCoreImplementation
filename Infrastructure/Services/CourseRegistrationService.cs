@@ -1,6 +1,7 @@
 ﻿using Core;
 using Infrastructure.BusinessObject;
 using Infrastructure.Context;
+using Infrastructure.DTO;
 using Infrastructure.Entities;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWorks;
@@ -13,9 +14,11 @@ namespace Infrastructure.Services
 {
     public interface ICourseRegistrationService : IDisposable
     {
-        Task<ValidationModel> RegisterStudentAsync(RegistrationInfo registration);
-        Task<ValidationModel> UpdateRegisteration(RegistrationInfo registration);
-        Task<ValidationModel> DeletRegisteration(int id);
+        ValidationModel<StudentRegistration> GetStudentRegistrationById(int id);
+        IList<RegistrationDTO> GetRegistrations();
+        Task<ValidationModel<StudentRegistration>> RegisterStudentAsync(RegistrationInfo registration);
+        Task<ValidationModel<StudentRegistration>> UpdateRegisteration(RegistrationInfo registration);
+        Task<ValidationModel<StudentRegistration>> DeletRegisteration(int id);
     }
 
     public class CourseRegistrationService : ICourseRegistrationService
@@ -28,12 +31,34 @@ namespace Infrastructure.Services
             _courseUnitOfWork = courseUnitOfWork;
         }
 
-        public async Task<ValidationModel> DeletRegisteration(int id)
+        public IList<RegistrationDTO> GetRegistrations()
+        {
+            return _courseUnitOfWork.StudentRegistrationRepository.GetRegistrations();
+        }
+
+        public ValidationModel<StudentRegistration> GetStudentRegistrationById(int id)
+        {
+            try
+            {
+                var studentRegistration = _courseUnitOfWork.StudentRegistrationRepository.GetById(id);
+                if (studentRegistration == null)
+                    throw new Exception($"Registration does not exists with {id} Id");
+
+                return new ValidationModel<StudentRegistration> { IsValid = true, Data = studentRegistration, Message = "Data found" };
+            }
+            catch (Exception ex)
+            {
+                //Implement serilog for logging the error message
+                return new ValidationModel<StudentRegistration> { IsValid = false, Message = ex.Message };
+            }
+        }
+
+        public async Task<ValidationModel<StudentRegistration>> DeletRegisteration(int id)
         {
             try
             {
                 if(id == 0)
-                    return new ValidationModel { IsValid = false, Message = "Please provide a valid Id" };
+                    return new ValidationModel<StudentRegistration> { IsValid = false, Message = "Please provide a valid Id" };
 
                 var registration = _courseUnitOfWork.StudentRegistrationRepository.GetById(id);
                 var student = _courseUnitOfWork.StudentRepository.GetById(registration.StudentId);
@@ -45,15 +70,15 @@ namespace Infrastructure.Services
 
                 await _courseUnitOfWork.SaveChangesAsync();
 
-                return new ValidationModel { IsValid = true, Message = $"{student.Name} has been successfully removed from {course.Title} course." };
+                return new ValidationModel<StudentRegistration> { IsValid = true, Data = registration, Message = $"{student.Name} has been successfully removed from {course.Title} course." };
             }
             catch (Exception ex)
             {
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<StudentRegistration> { IsValid = false, Message = ex.Message };
             }
         }
 
-        public async Task<ValidationModel> RegisterStudentAsync(RegistrationInfo registration)
+        public async Task<ValidationModel<StudentRegistration>> RegisterStudentAsync(RegistrationInfo registration)
         {
             try
             {
@@ -65,7 +90,7 @@ namespace Infrastructure.Services
                 var course = _courseUnitOfWork.CourseRepository.GetById(registration.StudentRegistration.CourseId);
 
                 if (course.SeatCount == 0)
-                    return new ValidationModel { IsValid = true, Message = "House full for this course" };
+                    return new ValidationModel<StudentRegistration> { IsValid = true, Message = "House full for this course" };
 
                 course.SeatCount -= 1;
                 _courseUnitOfWork.StudentRegistrationRepository.Add(registration.StudentRegistration);
@@ -73,15 +98,15 @@ namespace Infrastructure.Services
 
                 await _courseUnitOfWork.SaveChangesAsync();
 
-                return new ValidationModel { IsValid = true, Message = $"{student.Name} has been successfully registered with {course.Title} course." };
+                return new ValidationModel<StudentRegistration> { IsValid = true, Data = registration.StudentRegistration, Message = $"{student.Name} has been successfully registered with {course.Title} course." };
             }
             catch (Exception ex)
             {
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<StudentRegistration> { IsValid = false, Message = ex.Message };
             }
         }
 
-        public async Task<ValidationModel> UpdateRegisteration(RegistrationInfo registration)
+        public async Task<ValidationModel<StudentRegistration>> UpdateRegisteration(RegistrationInfo registration)
         {
             try
             {
@@ -95,11 +120,11 @@ namespace Infrastructure.Services
                 _courseUnitOfWork.StudentRegistrationRepository.Edit(registration.StudentRegistration);
                 await _courseUnitOfWork.SaveChangesAsync();
 
-                return new ValidationModel { IsValid = true, Message = $"{student.Name} registration has been updated to {course.Title} course." };
+                return new ValidationModel<StudentRegistration> { IsValid = true, Data = registration.StudentRegistration, Message = $"{student.Name} registration has been updated to {course.Title} course." };
             }
             catch (Exception ex)
             {
-                return new ValidationModel { IsValid = false, Message = ex.Message };
+                return new ValidationModel<StudentRegistration> { IsValid = false, Message = ex.Message };
             }
         }
 

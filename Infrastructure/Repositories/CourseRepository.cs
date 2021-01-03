@@ -25,16 +25,7 @@ namespace Infrastructure.Repositories
 
         public IList<Course> GetCourses()
         {
-            //var courseList = GetAll().Select(x => new CourseDTO
-            //{
-            //    Id = x.Id,
-            //    Title = x.Title,
-            //    SeatCount = x.SeatCount,
-            //    Fee = x.Fee
-            //}).ToList();
-            var courseList = GetAll().ToList();
-
-            return courseList;
+            return GetAll();
         }
     }
 }

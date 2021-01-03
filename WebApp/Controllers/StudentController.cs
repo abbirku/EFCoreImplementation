@@ -18,19 +18,19 @@ namespace WebApp.Controllers
 {
     public class StudentController : Controller
     {
-        private readonly IStudentService _studentService;
-
-        public StudentController(IStudentService studentService)
-        {
-            _studentService = studentService;
-        }
-
         public IActionResult Index(int id = 0, bool isValid = false, string message = "")
         {
-            var studentModel = Startup.AutofacContainer.Resolve<StudentModel>();
-            var model = studentModel.CreateStudentViewModel(id, isValid, message);
+            try
+            {
+                var studentModel = Startup.AutofacContainer.Resolve<StudentModel>();
+                var model = studentModel.CreateStudentViewModel(id, isValid, message);
 
-            return View(model);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Error", new { message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -38,7 +38,8 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = _studentService.EnrollStudent(new StudentInfo { Student = selectedStudent });
+                var studentModel = Startup.AutofacContainer.Resolve<StudentModel>();
+                var result = studentModel.EnrollStudent(new StudentInfo { Student = selectedStudent });
 
                 if (result.IsValid)
                     return RedirectToAction("Index", "Student", new { isValid = result.IsValid, message = result.Message });
@@ -56,7 +57,8 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = _studentService.UpdateStudentInfo(new StudentInfo { Student = selectedStudent });
+                var studentModel = Startup.AutofacContainer.Resolve<StudentModel>();
+                var result = studentModel.UpdateStudentInfo(new StudentInfo { Student = selectedStudent });
 
                 if (result.IsValid)
                     return RedirectToAction("Index", "Student", new { isValid = result.IsValid, message = result.Message });
@@ -74,7 +76,8 @@ namespace WebApp.Controllers
         {
             try
             {
-                var result = _studentService.RemoveStudent(id);
+                var studentModel = Startup.AutofacContainer.Resolve<StudentModel>();
+                var result = studentModel.RemoveStudent(id);
 
                 return Json(new { result.IsValid, result.Message });
             }

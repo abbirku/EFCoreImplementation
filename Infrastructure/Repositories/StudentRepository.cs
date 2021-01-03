@@ -12,7 +12,7 @@ namespace Infrastructure.Repositories
 {
     public interface IStudentRepository : IRepository<Student, int, CourseContext>
     {
-        
+        IList<StudentDTO> GetStudents();
     }
 
     public class StudentRepository : Repository<Student, int, CourseContext>, IStudentRepository
@@ -21,6 +21,18 @@ namespace Infrastructure.Repositories
             : base(dbContext)
         {
 
+        }
+
+        public IList<StudentDTO> GetStudents()
+        {
+            var studentList = GetAll().Select(x => new StudentDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                DateOfBirth = x.DateOfBirth.ToString("dd/MM/yyyy")
+            }).ToList();
+
+            return studentList;
         }
     }
 }
